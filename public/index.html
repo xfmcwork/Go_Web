@@ -1,0 +1,363 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>逸的生活记录</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            color: #333;
+            line-height: 1.6;
+            background: url('https://bing.biturl.top/?resolution=1920&format=image&index=0&mkt=zh-CN') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        body::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.7);
+            z-index: -1;
+        }
+        .navbar {
+            background-color: #34495e;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .navbar-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+            height: 60px;
+        }
+        .navbar-logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: white;
+            text-decoration: none;
+        }
+        .navbar-menu {
+            display: flex;
+            list-style: none;
+        }
+        .navbar-menu li {
+            margin-left: 20px;
+        }
+        .navbar-menu a {
+            color: white;
+            text-decoration: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            transition: background-color 0.3s ease;
+        }
+        .navbar-menu a:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        .navbar-toggle {
+            display: none;
+            cursor: pointer;
+            font-size: 1.5rem;
+        }
+        @media (max-width: 768px) {
+            .navbar-menu {
+                display: none;
+                flex-direction: column;
+                position: absolute;
+                top: 60px;
+                left: 0;
+                width: 100%;
+                background-color: #34495e;
+                padding: 10px 0;
+                box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            }
+            .navbar-menu.active {
+                display: flex;
+            }
+            .navbar-menu li {
+                margin: 10px 0;
+                text-align: center;
+            }
+            .navbar-toggle {
+                display: block;
+            }
+        }
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            flex-grow: 1;
+        }
+        .container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            position: relative;
+        }
+        .header h1 {
+            font-size: 2.5rem;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            position: relative;
+            display: inline-block;
+        }
+        .header h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: #3498db;
+            border-radius: 3px;
+        }
+        .header p {
+            color: #7f8c8d;
+            font-size: 1.1rem;
+        }
+        .content {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 25px;
+        }
+        .section {
+            background: #f9f9f9;
+            border-left: 4px solid #3498db;
+            padding: 20px;
+            border-radius: 0 8px 8px 0;
+            transition: all 0.3s ease;
+        }
+        .section:hover {
+            background: #f0f7ff;
+            transform: translateX(5px);
+        }
+        .section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.5rem;
+        }
+        .section p {
+            color: #555;
+            font-size: 1rem;
+        }
+        .footer {
+            background: #34495e;
+            color: #ecf0f1;
+            text-align: center;
+            padding: 20px 0;
+            margin-top: 30px;
+            width: 100%;
+        }
+        .footer a {
+            color: #3498db;
+            text-decoration: none;
+            transition: color 0.3s ease;
+            display: inline-block;
+            margin: 5px 0;
+        }
+        .footer a:hover {
+            color: #2980b9;
+            text-decoration: underline;
+        }
+        .footer .copyright {
+            margin-bottom: 15px;
+            font-size: 0.9rem;
+        }
+        .footer .tech-support {
+            font-size: 0.9rem;
+            color: #bdc3c7;
+            display: block;
+            margin-top: 10px;
+        }
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px 15px;
+                padding: 20px;
+            }
+            .header h1 {
+                font-size: 2rem;
+            }
+            .section h2 {
+                font-size: 1.3rem;
+            }
+            .footer {
+                padding: 15px 0;
+            }
+        }
+        .btn {
+            display: inline-block;
+            background: #3498db;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            text-decoration: none;
+            margin-top: 20px;
+            transition: background 0.3s ease;
+            text-align: center;
+        }
+        .btn:hover {
+            background: #2980b9;
+        }
+        .friend-links {
+            margin-top: 20px;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+        }
+        .friend-links h3 {
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1.2rem;
+        }
+        .friend-links ul {
+            list-style: none;
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+        }
+        .friend-links li {
+            margin: 5px 0;
+        }
+        .friend-links a {
+            color: #3498db;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            display: inline-block;
+            padding: 5px 10px;
+            border-radius: 4px;
+        }
+        .friend-links a:hover {
+            background-color: #f0f7ff;
+            color: #2980b9;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar">
+        <div class="navbar-container">
+            <a href="#" class="navbar-logo">逸的生活记录</a>
+            <div class="navbar-toggle" id="navbar-toggle">
+                <i class="fa fa-bars"></i>
+            </div>
+            <ul class="navbar-menu" id="navbar-menu">
+                <li><a href="#about">关于我</a></li>
+                <li><a href="#content">记录内容</a></li>
+                <li><a href="#contact">联系方式</a></li>
+                <li><a href="#links">友情链接</a></li>
+            </ul>
+        </div>
+    </nav>
+    <div class="container">
+        <div class="header">
+            <h1>逸的生活记录</h1>
+            <p>记录生活中的美好与感悟</p>
+        </div>
+        <div class="content">
+            <div class="section" id="about">
+                <h2>关于我</h2>
+                <p>你好！我是逸，一名热爱生活的记录者。我相信生活中的每一刻都值得被珍藏和分享。通过这个平台，我希望能够记录下生活中的点滴美好，与你分享我的思考和感悟。</p>
+            </div>
+            <div class="section" id="content">
+                <h2>记录内容</h2>
+                <p>我正在学习Go, 我将会在仅有1G硬盘的vps上实现惊人的效果, 请期待吧。</p>
+            </div>
+            <div class="section" id="contact">
+                <h2>联系方式</h2>
+                <p>如果你对我的记录感兴趣，或者有任何问题或建议，欢迎通过以下方式与我联系。我很乐意听取你的想法，并与你交流和分享。</p>
+                <div id="email-container" class="btn" style="cursor: pointer;">点击显示邮箱</div>
+                <div class="friend-links" id="links">
+                    <h3>友情链接</h3>
+                    <ul>
+                        <li><a href="#" target="_blank">链接名称1</a></li>
+                        <li><a href="#" target="_blank">链接名称2</a></li>
+                        <li><a href="#" target="_blank">链接名称3</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+    <footer class="footer">
+        <div class="footer_custom_text">
+            <div class="copyright">© 2025 逸的生活记录 版权所有</div>
+            <a href="https://beian.miit.gov.cn/" class="beian-link" target="_blank">苏ICP备2025155774号-1</a><br>
+            <a href="https://beian.mps.gov.cn/#/query/webSearch?code=32011102010720" class="beian-link" target="_blank">苏公网安备32011102010720号</a><br>
+            <span class="tech-support">由腾讯云＆阿里云提供技术支持</span>
+        </div>
+    </footer>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const navbarToggle = document.getElementById('navbar-toggle');
+            const navbarMenu = document.getElementById('navbar-menu');
+            const navbarLinks = navbarMenu.querySelectorAll('a');
+            navbarToggle.addEventListener('click', function() {
+                navbarMenu.classList.toggle('active');
+            });
+            navbarLinks.forEach(link => {
+                link.addEventListener('click', function() {
+                    if (window.innerWidth < 768) {
+                        navbarMenu.classList.remove('active');
+                    }
+                });
+            });
+            const emailContainer = document.getElementById('email-container');
+            const emailParts = [
+                [49, 54, 50, 54, 52, 50, 52, 50, 49, 54],
+                [64, 113, 113, 46, 99, 111, 109]
+            ];
+            function decodeEmail(parts) {
+                return parts.map(part => 
+                    part.map(charCode => String.fromCharCode(charCode)).join('')
+                ).join('');
+            }
+            emailContainer.addEventListener('click', function() {
+                const email = decodeEmail(emailParts);
+                const mailtoLink = document.createElement('a');
+                mailtoLink.href = 'mailto:' + email;
+                mailtoLink.textContent = email;
+                mailtoLink.style.color = 'white';
+                mailtoLink.style.textDecoration = 'none';
+                emailContainer.innerHTML = '';
+                emailContainer.appendChild(mailtoLink);
+                const tempInput = document.createElement('input');
+                tempInput.value = email;
+                document.body.appendChild(tempInput);
+                tempInput.select();
+                document.execCommand('copy');
+                document.body.removeChild(tempInput);
+                const originalText = emailContainer.textContent;
+                emailContainer.textContent = '邮箱已复制到剪贴板！';
+                setTimeout(() => {
+                    emailContainer.innerHTML = '';
+                    emailContainer.appendChild(mailtoLink);
+                }, 2000);
+            });
+        });
+    </script>
+</body>
+</html>

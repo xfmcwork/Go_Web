@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>验证码测试</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 400px;
+            margin: 50px auto;
+            padding: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        button {
+            padding: 10px 15px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .error {
+            color: red;
+            margin-top: 5px;
+        }
+        .captcha-container {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        .captcha-img {
+            height: 40px;
+            border: 1px solid #ddd;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <h3>验证码测试</h3>
+    
+    <form id="verifyForm">
+        <div class="form-group">
+            <label for="username">用户名</label>
+            <input type="text" id="username" required>
+        </div>
+        
+        <div class="form-group">
+            <label for="email">邮箱</label>
+            <input type="email" id="email" required placeholder="请输入邮箱">
+            <div class="error" id="emailError"></div>
+        </div>
+        
+        <div class="form-group">
+            <label for="confirmEmail">确认邮箱</label>
+            <input type="email" id="confirmEmail" required placeholder="请再次输入邮箱">
+            <div class="error" id="confirmEmailError"></div>
+        </div>
+        
+        <div class="form-group">
+            <label>验证码</label>
+            <div class="captcha-container">
+                <img id="captchaImg" src="https://127.0.0.1/api?action=captcha" 
+                     alt="验证码" class="captcha-img" onclick="refreshCaptcha()">
+                <input type="text" id="captchaCode" required>
+            </div>
+            <div class="error" id="errorMsg"></div>
+        </div>
+        
+        <button type="submit">验证</button>
+    </form>
+
+    <script>
+        function refreshCaptcha() {
+            document.getElementById('captchaImg').src = 
+                '/api?action=captcha&t=' + Date.now();
+        }
+        
+        function validateEmail(email) {
+            const re = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+            return re.test(String(email).toLowerCase());
+        }
+        
+        document.getElementById('verifyForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const confirmEmail = document.getElementById('confirmEmail').value;
+            const captcha = document.getElementById('captchaCode').value;
+            
+            document.getElementById('errorMsg').textContent = '';
+            document.getElementById('emailError').textContent = '';
+            document.getElementById('confirmEmailError').textContent = '';
+            
+            let isValid = true;
+            
+            if (!validateEmail(email)) {
+                document.getElementById('emailError').textContent = '请输入有效的邮箱地址';
+                isValid = false;
+            }
+            
+            if (email !== confirmEmail) {
+                document.getElementById('confirmEmailError').textContent = '两次输入的邮箱不一致';
+                isValid = false;
+            }
+            
+            if (!isValid) {
+                refreshCaptcha();
+                return;
+            }
+            
+            const formData = new FormData();
+            formData.append('username', username);
+            formData.append('email', email);
+            formData.append('action', 'forgotPassword');
+            formData.append('captcha', captcha);
+            fetch('/api?action=forgotPassword', {
+                method: 'POST',
+                body: formData
+            })
+            .then(async response => {
+                if (!response.ok) {
+                    try {
+                        const errorData = await response.json();
+                        if (errorData.error) {
+                            throw new Error(errorData.error);
+                        } else {
+                            throw new Error(`服务器错误: ${response.status}`);
+                        }
+                    } catch (e) {
+                        throw new Error(e.message || `服务器错误: ${response.status}`);
+                    }
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.message === "重置成功") {
+                    alert('验证成功！重置密码邮件已发送到您的邮箱');
+                    refreshCaptcha();
+                    document.getElementById('verifyForm').reset();
+                } else {
+                    if (data.error) {
+                        document.getElementById('errorMsg').textContent = data.error;
+                    } else if (data.message) {
+                        document.getElementById('errorMsg').textContent = data.message;
+                    } else {
+                        document.getElementById('errorMsg').textContent = '验证失败';
+                    }
+                    refreshCaptcha();
+                }
+            })
+            .catch(error => {
+                console.error('请求失败:', error);
+                document.getElementById('errorMsg').textContent = error.message || '网络错误，请重试';
+                refreshCaptcha();
+            });
+        });
+    </script>
+</body>
+</html>

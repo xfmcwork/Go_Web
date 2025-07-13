@@ -1,0 +1,18 @@
+debug: false
+server:
+  http_enabled: true
+  https_enabled: true
+  http_to_https: false
+  http_port: ":80"
+  https_port: ":443"
+  ssl:
+    cert_file: "./config/certificate.crt"
+    key_file: "./config/private.key"
+  db:
+    dir: "./config/database.db"
+  smtp:
+    server: "smtp.qiye.aliyun.com"
+    port: 465
+    ssl: true
+    email: ""
+    password: ""
