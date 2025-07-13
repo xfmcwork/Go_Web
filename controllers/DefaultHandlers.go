@@ -11,7 +11,8 @@ func DefaultHandlers(c *gin.Context) {
 	method := c.Request.Method
 	switch {
 	case path == "/":
-		c.JSON(http.StatusInternalServerError, gin.H{"msg": "域名没有绑定"})
+		
+		c.JSON(http.StatusUnauthorized, gin.H{"msg": "域名没有绑定"})
 	case path == "/api":
 		switch method {
 		case http.MethodPost:

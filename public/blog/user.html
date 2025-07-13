@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>逸的生活记录</title>
+  <style>
+    :root {
+      --primary-color: #4a90e2;
+      --error-color: #e74c3c;
+      --success-color: #2ecc71;
+      --info-color: #3498db;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    }
+
+    body {
+      background-color: #f5f7fa;
+      color: #333;
+      line-height: 1.6;
+      -webkit-text-size-adjust: 100%;
+    }
+
+    .container {
+      max-width: 800px;
+      margin: 50px auto;
+      padding: 20px;
+    }
+
+    .header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      color: var(--primary-color);
+      margin-bottom: 10px;
+    }
+
+    .header .user-info {
+      margin-top: 15px;
+      padding: 8px 12px;
+      background-color: rgba(74, 144, 226, 0.1);
+      border-radius: 4px;
+      display: inline-block;
+    }
+
+    .auth-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      margin: 30px 0;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      background-color: var(--primary-color);
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background-color 0.3s;
+      font-size: 16px;
+    }
+
+    .btn:hover {
+      background-color: #3b82f6;
+    }
+
+    .btn-secondary {
+      background-color: #f0f0f0;
+      color: #333;
+    }
+
+    .btn-secondary:hover {
+      background-color: #e0e0e0;
+    }
+
+    .btn-danger {
+      background-color: #e74c3c;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .content {
+      background-color: white;
+      padding: 20px;
+      border-radius: 6px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 6px;
+      width: 90%;
+      max-width: 400px;
+      min-width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      animation: modalFadeIn 0.3s;
+      overflow-y: auto;
+      max-height: 80vh;
+    }
+
+    @keyframes modalFadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .tab-container {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #eee;
+      display: flex;
+    }
+
+    .tab {
+      flex: 1;
+      padding: 10px 15px;
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      font-weight: 500;
+      text-align: center;
+    }
+
+    .tab.active {
+      border-bottom-color: var(--primary-color);
+      color: var(--primary-color);
+    }
+
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    .close:hover {
+      color: #333;
+    }
+
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 5px;
+      font-weight: 500;
+    }
+
+    .form-control {
+      width: 100%;
+      padding: 10px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      font-size: 16px;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: var(--primary-color);
+      box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+    }
+
+    .error-message {
+      color: var(--error-color);
+      margin-top: 5px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .success-message {
+      color: var(--success-color);
+      margin-top: 5px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .info-message {
+      color: var(--info-color);
+      margin-top: 5px;
+      font-size: 14px;
+      display: none;
+    }
+
+    .loading {
+      text-align: center;
+      padding: 15px;
+      display: none;
+    }
+
+    .loading .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(74, 144, 226, 0.3);
+      border-top-color: var(--primary-color);
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+      display: inline-block;
+      margin-right: 10px;
+    }
+
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
+    .form-footer {
+      margin-top: 15px;
+      text-align: center;
+      font-size: 14px;
+    }
+
+    .form-footer a {
+      color: var(--primary-color);
+      text-decoration: none;
+    }
+
+    .form-footer a:hover {
+      text-decoration: underline;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 50px;
+      color: #666;
+      font-size: 14px;
+    }
+
+    .footer_custom_text {
+      margin-top: 20px;
+      text-align: center;
+      font-size: 12px;
+      color: #666;
+    }
+
+    .footer_custom_text .copyright {
+      margin-bottom: 5px;
+    }
+
+    .footer_custom_text .beian-link {
+      color: #666;
+      text-decoration: none;
+      margin: 0 5px;
+    }
+
+    .footer_custom_text .beian-link:hover {
+      text-decoration: underline;
+    }
+
+    .footer_custom_text .tech-support {
+      display: block;
+      margin-top: 10px;
+    }
+
+    #forgotPasswordContainer {
+      display: none;
+    }
+
+    .status-modal {
+      display: none;
+      position: fixed;
+      z-index: 1001;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0, 0, 0, 0.4);
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .status-modal-content {
+      background-color: white;
+      margin: 15% auto;
+      padding: 20px;
+      border-radius: 6px;
+      width: 90%;
+      max-width: 400px;
+      min-width: 300px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      animation: modalFadeIn 0.3s;
+      overflow-y: auto;
+      max-height: 80vh;
+    }
+
+    .status-item {
+      margin-bottom: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #eee;
+    }
+
+    .status-item:last-child {
+      border-bottom: none;
+      margin-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .status-label {
+      font-weight: 500;
+      color: #666;
+    }
+
+    .status-value {
+      margin-left: 10px;
+    }
+
+    .status-actions {
+      margin-top: 15px;
+      text-align: right;
+    }
+
+    .captcha-container {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .captcha-input {
+      flex: 1;
+    }
+
+    .captcha-img {
+      height: 40px;
+      width: 120px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: opacity 0.2s;
+      object-fit: cover;
+    }
+
+    .captcha-img:hover {
+      opacity: 0.8;
+    }
+
+    @media (max-width: 480px) {
+      .modal-content {
+        margin: 10% auto;
+        padding: 15px;
+      }
+
+      .btn {
+        padding: 12px;
+        font-size: 16px;
+      }
+
+      .form-control {
+        font-size: 16px;
+      }
+
+      .captcha-img {
+        width: 100px;
+        height: 40px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>逸的生活记录</h1>
+      <p>记录美好的生活</p>
+      <div id="userInfo" class="user-info" style="display: none;"></div>
+    </div>
+    <div class="auth-buttons" id="authButtons">
+      <button id="authBtn" class="btn">登录/注册</button>
+    </div>
+    <div id="userContent" class="content" style="display: none;">
+      <h2>用户中心</h2>
+      <p>欢迎回来，<span id="welcomeUsername"></span>！</p>
+      <p>您已成功登录系统，可以开始使用各项功能。</p>
+    </div>
+    <div class="content" id="guestContent">
+      <h2>系统功能说明</h2>
+      <p>本系统实现了基础的用户认证功能，包括登录和注册接口的前端调用。</p>
+      <p>点击上方按钮打开操作窗口，输入用户名和密码即可进行操作。</p>
+    </div>
+    <div class="footer">
+      <div class="footer_custom_text">
+        <div class="copyright">© 2025 逸的生活记录 版权所有</div>
+        <a href="https://beian.miit.gov.cn/" class="beian-link" target="_blank">苏ICP备2025193878号-1</a><br>
+        <a href="https://beian.mps.gov.cn/#/query/webSearch?code=32011102010720" class="beian-link"
+          target="_blank">苏公网安备32011102010720号</a><br>
+        <span class="tech-support">由腾讯云＆阿里云提供技术支持</span>
+      </div>
+    </div>
+  </div>
+  <div id="authModal" class="modal">
+    <div class="modal-content">
+      <span class="close" id="closeAuth">&times;</span>
+      <div class="tab-container">
+        <div class="tab active" id="loginTab">登录</div>
+        <div class="tab" id="registerTab">注册</div>
+        <div class="tab" id="forgotPasswordTab">忘记密码</div>
+      </div>
+      <div id="loginFormContainer">
+        <h2>用户登录</h2>
+        <div id="loginError" class="error-message"></div>
+        <form id="loginForm">
+          <div class="form-group">
+            <input type="text" id="loginUsername" class="form-control" placeholder="请输入用户名" required>
+          </div>
+          <div class="form-group">
+            <input type="password" id="loginPassword" class="form-control" placeholder="请输入密码" required>
+          </div>
+          <div class="form-group captcha-container">
+            <div class="captcha-input">
+              <input type="text" id="loginCaptcha" class="form-control" placeholder="请输入验证码" required>
+            </div>
+            <img id="loginCaptchaImg" class="captcha-img" src="" alt="验证码">
+          </div>
+          <div id="loginLoading" class="loading">
+            <div class="spinner"></div>
+            <span>正在登录...</span>
+          </div>
+          <button type="submit" class="btn">登录</button>
+        </form>
+        <div class="form-footer" style="margin-top: 10px;">
+          <a href="#" id="forgotPasswordLink">忘记密码？</a>
+        </div>
+      </div>
+      <div id="registerFormContainer" style="display: none;">
+        <h2>用户注册</h2>
+        <div id="registerError" class="error-message"></div>
+        <form id="registerForm">
+          <div class="form-group">
+            <input type="text" id="registerUsername" class="form-control" placeholder="请设置用户名" required>
+          </div>
+          <div class="form-group">
+            <input type="password" id="registerPassword" class="form-control" placeholder="请设置密码" required>
+          </div>
+          <div class="form-group">
+            <input type="password" id="registerConfirmPassword" class="form-control" placeholder="请再次输入密码" required>
+          </div>
+          <div class="form-group captcha-container">
+            <div class="captcha-input">
+              <input type="text" id="registerCaptcha" class="form-control" placeholder="请输入验证码" required>
+            </div>
+            <img id="registerCaptchaImg" class="captcha-img" src="" alt="验证码">
+          </div>
+          <div id="registerLoading" class="loading">
+            <div class="spinner"></div>
+            <span>正在注册...</span>
+          </div>
+          <button type="submit" class="btn">注册</button>
+        </form>
+      </div>
+      <div id="forgotPasswordContainer" style="display: none;">
+        <h2>找回密码</h2>
+        <div id="forgotPasswordError" class="error-message"></div>
+        <form id="forgotPasswordForm">
+          <div class="form-group">
+            <input type="text" id="forgotUsername" class="form-control" placeholder="请输入用户名" required>
+          </div>
+          <div class="form-group">
+            <input type="email" id="forgotEmail" class="form-control" placeholder="请输入注册邮箱" required>
+          </div>
+          <div class="form-group captcha-container">
+            <div class="captcha-input">
+              <input type="text" id="forgotCaptcha" class="form-control" placeholder="请输入验证码" required>
+            </div>
+            <img id="forgotCaptchaImg" class="captcha-img" src="" alt="验证码">
+          </div>
+          <div id="forgotPasswordLoading" class="loading">
+            <div class="spinner"></div>
+            <span>正在发送...</span>
+          </div>
+          <button type="submit" class="btn">发送重置邮件</button>
+        </form>
+      </div>
+      <div class="form-footer">
+        <span id="switchAuth">没有账号？<a href="#" id="toRegister">立即注册</a></span>
+      </div>
+    </div>
+  </div>
+  <div id="statusModal" class="status-modal">
+    <div class="status-modal-content">
+      <span class="close" id="closeStatusModal">&times;</span>
+      <h2>账户管理</h2>
+      <div id="statusContent">
+        <div class="status-item">
+          <span class="status-label">用户名:</span>
+          <span class="status-value" id="statusUsername"></span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">登录状态:</span>
+          <span class="status-value" id="statusLogin"></span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">绑定邮箱:</span>
+          <span class="status-value" id="bindEmail"></span>
+        </div>
+        <div class="status-item">
+          <span class="status-label">上次登录时间:</span>
+          <span class="status-value" id="statusLastLogin"></span>
+        </div>
+      </div>
+      <div class="status-actions">
+        <button id="closeStatusBtn" class="btn btn-secondary">关闭</button>
+        <button id="logoutFromStatusBtn" class="btn btn-danger">退出登录</button>
+      </div>
+    </div>
+  </div>
+  <div id="bindEmailModal" class="status-modal">
+    <div class="status-modal-content">
+      <span class="close" id="closeBindEmailModal">&times;</span>
+      <h2>绑定邮箱</h2>
+      <div id="bindEmailContent">
+        <p>为了您的账户安全，请绑定您的邮箱地址。</p>
+        <form id="bindEmailForm">
+          <div class="form-group">
+            <input type="email" id="bindEmailInput" class="form-control" placeholder="请输入您的邮箱地址" required>
+          </div>
+          <div id="bindEmailError" class="error-message"></div>
+          <div id="bindEmailLoading" class="loading">
+            <div class="spinner"></div>
+            <span>正在绑定...</span>
+          </div>
+          <button type="submit" class="btn">提交</button>
+        </form>
+      </div>
+      <div class="status-actions">
+        <button id="closeBindEmailBtn" class="btn btn-secondary">稍后再说</button>
+        <button id="confirmBindEmailBtn" class="btn btn-danger">立即绑定</button>
+      </div>
+    </div>
+  </div>
+  <script>
+    const authBtn = document.getElementById('authBtn');
+    const authModal = document.getElementById('authModal');
+    const closeAuth = document.getElementById('closeAuth');
+    const loginForm = document.getElementById('loginForm');
+    const registerForm = document.getElementById('registerForm');
+    const forgotPasswordForm = document.getElementById('forgotPasswordForm');
+    const loginError = document.getElementById('loginError');
+    const registerError = document.getElementById('registerError');
+    const forgotPasswordError = document.getElementById('forgotPasswordError');
+    const loginLoading = document.getElementById('loginLoading');
+    const registerLoading = document.getElementById('registerLoading');
+    const forgotPasswordLoading = document.getElementById('forgotPasswordLoading');
+    const loginTab = document.getElementById('loginTab');
+    const registerTab = document.getElementById('registerTab');
+    const forgotPasswordTab = document.getElementById('forgotPasswordTab');
+    const loginFormContainer = document.getElementById('loginFormContainer');
+    const registerFormContainer = document.getElementById('registerFormContainer');
+    const forgotPasswordContainer = document.getElementById('forgotPasswordContainer');
+    const switchAuth = document.getElementById('switchAuth');
+    const toRegister = document.getElementById('toRegister');
+    const forgotPasswordLink = document.getElementById('forgotPasswordLink');
+    const userInfo = document.getElementById('userInfo');
+    const welcomeUsername = document.getElementById('welcomeUsername');
+    const authButtons = document.getElementById('authButtons');
+    const userContent = document.getElementById('userContent');
+    const guestContent = document.getElementById('guestContent');
+    const statusModal = document.getElementById('statusModal');
+    const closeStatusModal = document.getElementById('closeStatusModal');
+    const closeStatusBtn = document.getElementById('closeStatusBtn');
+    const logoutFromStatusBtn = document.getElementById('logoutFromStatusBtn');
+    const statusUsername = document.getElementById('statusUsername');
+    const statusLogin = document.getElementById('statusLogin');
+    const bindEmail = document.getElementById('bindEmail');
+    const statusLastLogin = document.getElementById('statusLastLogin');
+    const loginCaptchaImg = document.getElementById('loginCaptchaImg');
+    const registerCaptchaImg = document.getElementById('registerCaptchaImg');
+    const forgotCaptchaImg = document.getElementById('forgotCaptchaImg');
+    const bindEmailModal = document.getElementById('bindEmailModal');
+    const closeBindEmailModal = document.getElementById('closeBindEmailModal');
+    const closeBindEmailBtn = document.getElementById('closeBindEmailBtn');
+    const confirmBindEmailBtn = document.getElementById('confirmBindEmailBtn');
+    const bindEmailForm = document.getElementById('bindEmailForm');
+    const bindEmailInput = document.getElementById('bindEmailInput');
+    const bindEmailError = document.getElementById('bindEmailError');
+    const bindEmailLoading = document.getElementById('bindEmailLoading');
+    function handleBindEmail(e) {
+      e.preventDefault();
+      const email = bindEmailInput.value.trim();
+      if (!email) {
+        bindEmailError.textContent = '请输入有效的邮箱地址';
+        bindEmailError.style.display = 'block';
+        return;
+      }
+      if (!/^\S+@\S+\.\S+$/.test(email)) {
+        bindEmailError.textContent = '邮箱格式不正确';
+        bindEmailError.style.display = 'block';
+        return;
+      }
+      bindEmailLoading.style.display = 'block';
+      bindEmailError.style.display = 'none';
+      const formData = new FormData();
+      formData.append('email', email);
+      fetch('/api?action=bindEmail', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData)
+      })
+        .then(response => {
+          bindEmailLoading.style.display = 'none';
+          if (response.ok) return response.json();
+          else return response.json().then(error => { throw new Error(error.error || '绑定邮箱失败'); });
+        })
+        .then(result => {
+          bindEmailError.textContent = '邮箱绑定成功！';
+          bindEmailError.className = 'success-message';
+          bindEmailError.style.display = 'block';
+          const userInfo = document.getElementById('userInfo');
+          if (userInfo) {
+            userInfo.innerHTML = `欢迎，${result.user ? result.user.username : '用户'} 
+        <span style="cursor: pointer; color: var(--primary-color); margin-left: 10px;" id="accountManage">账户管理</span>`;
+          }
+          setTimeout(() => {
+            bindEmailModal.style.display = 'none';
+            window.location.reload();
+          }, 200);
+        })
+        .catch(error => {
+          bindEmailError.textContent = error.message;
+          bindEmailError.style.display = 'block';
+        });
+    }
+    bindEmailForm.addEventListener('submit', handleBindEmail);
+    closeBindEmailModal.addEventListener('click', () => {
+      bindEmailModal.style.display = 'none';
+    });
+    closeBindEmailBtn.addEventListener('click', () => {
+      bindEmailModal.style.display = 'none';
+    });
+    confirmBindEmailBtn.addEventListener('click', () => {
+      bindEmailForm.dispatchEvent(new Event('submit'));
+    });
+    function getCookie(name) {
+      const nameEQ = `${name}=`;
+      const ca = document.cookie.split(';');
+      for (let i = 0; i < ca.length; i++) {
+        let c = ca[i];
+        while (c.charAt(0) === ' ') c = c.substring(1, c.length);
+        if (c.indexOf(nameEQ) === 0) return c.substring(nameEQ.length, c.length);
+      } return null;
+    } function deleteCookie(name) {
+      const expires = new Date();
+      expires.setTime(expires.getTime() - 86400000);
+      document.cookie = `${name}=; expires=${expires.toUTCString()}; path=/`;
+    } function formatTimestamp(timestamp) {
+      if (!timestamp) return '未知';
+      if (timestamp < 10000000000) timestamp = timestamp * 1000;
+      const date = new Date(timestamp);
+      return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}-${String(date.getDate()).padStart(2, '0')} ${String(date.getHours()).padStart(2, '0')}:${String(date.getMinutes()).padStart(2, '0')}:${String(date.getSeconds()).padStart(2, '0')}`;
+    } function openAuthModal(tab = 'login') {
+      authModal.style.display = 'block';
+      loginError.style.display = 'none';
+      registerError.style.display = 'none';
+      forgotPasswordError.style.display = 'none';
+      switchTab(tab);
+      document.body.style.overflow = 'hidden';
+      document.body.style.position = 'fixed';
+      document.body.style.width = '100%';
+    } function closeAuthModal() {
+      authModal.style.display = 'none';
+      document.body.style.overflow = '';
+      document.body.style.position = '';
+      document.body.style.width = '';
+    } function refreshCaptcha() {
+      const currentTab = document.querySelector('.tab.active').id;
+      if (currentTab === 'loginTab' && loginCaptchaImg) {
+        loginCaptchaImg.src = `/api?action=captcha&form=login&t=${Date.now()}`;
+      } else if (currentTab === 'registerTab' && registerCaptchaImg) {
+        registerCaptchaImg.src = `/api?action=captcha&form=register&t=${Date.now()}`;
+      } else if (currentTab === 'forgotPasswordTab' && forgotCaptchaImg) {
+        forgotCaptchaImg.src = `/api?action=captcha&form=forgot&t=${Date.now()}`;
+      }
+    } function switchTab(tab) {
+      loginTab.classList.remove('active');
+      registerTab.classList.remove('active');
+      forgotPasswordTab.classList.remove('active');
+      loginFormContainer.style.display = 'none';
+      registerFormContainer.style.display = 'none';
+      forgotPasswordContainer.style.display = 'none';
+      if (tab === 'login') {
+        loginTab.classList.add('active');
+        loginFormContainer.style.display = 'block';
+        switchAuth.innerHTML = '没有账号？<a href="#" id="toRegister">立即注册</a>';
+        if (loginCaptchaImg) {
+          loginCaptchaImg.src = `/api?action=captcha&form=login&t=${Date.now()}`;
+        }
+      } else if (tab === 'register') {
+        registerTab.classList.add('active');
+        registerFormContainer.style.display = 'block';
+        switchAuth.innerHTML = '已有账号？<a href="#" id="toLogin">立即登录</a>';
+        if (registerCaptchaImg) {
+          registerCaptchaImg.src = `/api?action=captcha&form=register&t=${Date.now()}`;
+        }
+      } else if (tab === 'forgotPassword') {
+        forgotPasswordTab.classList.add('active');
+        forgotPasswordContainer.style.display = 'block';
+        switchAuth.innerHTML = '返回？<a href="#" id="backToLogin">登录</a>';
+        if (forgotCaptchaImg) {
+          forgotCaptchaImg.src = `/api?action=captcha&form=forgot&t=${Date.now()}`;
+        }
+      }
+      bindAuthLinks();
+    } function bindAuthLinks() {
+      if (document.getElementById('toRegister')) document.getElementById('toRegister').addEventListener('click', handleToRegister);
+      if (document.getElementById('toLogin')) document.getElementById('toLogin').addEventListener('click', handleToLogin);
+      if (document.getElementById('backToLogin')) document.getElementById('backToLogin').addEventListener('click', handleBackToLogin);
+      if (loginCaptchaImg) loginCaptchaImg.addEventListener('click', refreshCaptcha);
+      if (registerCaptchaImg) registerCaptchaImg.addEventListener('click', refreshCaptcha);
+      if (forgotCaptchaImg) forgotCaptchaImg.addEventListener('click', refreshCaptcha);
+    } function handleToRegister(e) { e.preventDefault(); switchTab('register'); } function handleToLogin(e) { e.preventDefault(); switchTab('login'); } function handleBackToLogin(e) { e.preventDefault(); switchTab('login'); } function handleLogin(e) {
+      e.preventDefault();
+      const username = document.getElementById('loginUsername').value.trim();
+      const password = document.getElementById('loginPassword').value.trim();
+      const captcha = document.getElementById('loginCaptcha').value.trim();
+      if (!username || !password) {
+        loginError.textContent = '用户名和密码不能为空';
+        loginError.style.display = 'block';
+        return;
+      } if (!captcha) {
+        loginError.textContent = '请输入验证码';
+        loginError.style.display = 'block';
+        return;
+      } loginLoading.style.display = 'block';
+      loginError.style.display = 'none';
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('captcha', captcha);
+      formData.append('form', 'login');
+      fetch('/api?action=login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData)
+      })
+        .then(response => {
+          loginLoading.style.display = 'none';
+          if (response.ok) return response.json();
+          else return response.json().then(error => { throw new Error(error.error || '登录失败，请重试'); });
+        })
+        .then(result => {
+          showUserInfo(result);
+          closeAuthModal();
+          loginError.textContent = '登录成功！';
+          loginError.className = 'success-message';
+          loginError.style.display = 'block';
+          setTimeout(() => { loginError.style.display = 'none'; window.location.reload(); }, 100);
+        })
+        .catch(error => {
+          loginError.textContent = error.message;
+          loginError.style.display = 'block';
+          refreshCaptcha();
+        });
+    } function handleRegister(e) {
+      e.preventDefault();
+      const username = document.getElementById('registerUsername').value.trim();
+      const password = document.getElementById('registerPassword').value.trim();
+      const confirmPassword = document.getElementById('registerConfirmPassword').value.trim();
+      const captcha = document.getElementById('registerCaptcha').value.trim();
+      if (!username || !password) {
+        registerError.textContent = '用户名和密码不能为空';
+        registerError.style.display = 'block';
+        return;
+      } if (password !== confirmPassword) {
+        registerError.textContent = '两次输入的密码不一致';
+        registerError.style.display = 'block';
+        return;
+      } if (!captcha) {
+        registerError.textContent = '请输入验证码';
+        registerError.style.display = 'block';
+        return;
+      } registerLoading.style.display = 'block';
+      registerError.style.display = 'none';
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('password', password);
+      formData.append('captcha', captcha);
+      formData.append('form', 'register');
+      fetch('/api?action=register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData)
+      })
+        .then(response => {
+          registerLoading.style.display = 'none';
+          if (response.ok) return response.json();
+          else return response.json().then(error => { throw new Error(error.error || '注册失败，请重试'); });
+        })
+        .then(result => {
+          registerError.textContent = '注册成功！请登录';
+          registerError.className = 'success-message';
+          registerError.style.display = 'block';
+          switchTab('login');
+          setTimeout(() => { document.getElementById('loginUsername').value = username; }, 3000);
+        })
+        .catch(error => {
+          registerError.textContent = error.message;
+          registerError.style.display = 'block';
+          refreshCaptcha();
+        });
+    } function handleForgotPassword(e) {
+      e.preventDefault();
+      const username = document.getElementById('forgotUsername').value.trim();
+      const email = document.getElementById('forgotEmail').value.trim();
+      const captcha = document.getElementById('forgotCaptcha').value.trim();
+      if (!username || !email) {
+        forgotPasswordError.textContent = '用户名和邮箱不能为空';
+        forgotPasswordError.style.display = 'block';
+        return;
+      } if (!captcha) {
+        forgotPasswordError.textContent = '请输入验证码';
+        forgotPasswordError.style.display = 'block';
+        return;
+      } forgotPasswordLoading.style.display = 'block';
+      forgotPasswordError.style.display = 'none';
+      const formData = new FormData();
+      formData.append('username', username);
+      formData.append('email', email);
+      formData.append('captcha', captcha);
+      formData.append('form', 'forgot');
+      fetch('/api?action=forgotPassword', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams(formData)
+      })
+        .then(response => {
+          forgotPasswordLoading.style.display = 'none';
+          if (response.ok) return response.json();
+          else return response.json().then(error => { throw new Error(error.error || '找回密码失败，请重试'); });
+        })
+        .then(result => {
+          forgotPasswordError.textContent = '重置密码邮件已发送，请检查您的邮箱';
+          forgotPasswordError.className = 'success-message';
+          forgotPasswordError.style.display = 'block';
+          setTimeout(() => { switchTab('login'); }, 3000);
+        })
+        .catch(error => {
+          forgotPasswordError.textContent = error.message;
+          forgotPasswordError.style.display = 'block';
+          refreshCaptcha();
+        });
+    } function checkLoginStatus() {
+      const sessionCookie = getCookie('session');
+      if (!sessionCookie) { showGuestContent(); return false; } const loadingElement = document.createElement('div');
+      loadingElement.className = 'loading';
+      loadingElement.innerHTML = '<div class="spinner"></div><span>正在验证登录状态...</span>';
+      authButtons.parentNode.insertBefore(loadingElement, authButtons.nextSibling);
+
+      return fetch('/api?action=checkLogin', { method: 'GET' })
+        .then(response => {
+          if (loadingElement.parentNode) loadingElement.parentNode.removeChild(loadingElement);
+          if (response.ok) return response.json();
+          else {
+            if (response.status === 401) { deleteCookie('session'); showGuestContent(); return null; } throw new Error('验证登录状态失败');
+          }
+        })
+        .then(result => {
+          if (result && result.authenticated) { showUserInfo(result); updateStatusModal(result); return true; } else { deleteCookie('session'); showGuestContent(); return false; }
+        })
+        .catch(error => {
+          console.error('验证登录状态出错:', error);
+          showGuestContent();
+          return false;
+        });
+    } function updateStatusModal(result) {
+      statusUsername.textContent = result.user ? result.user.username : '未知';
+      bindEmail.textContent = result.user.email ? result.user.email : '未绑定';;
+      statusLogin.textContent = '已登录';
+      statusLogin.className = 'status-value';
+      statusLastLogin.textContent = formatTimestamp(result.lastLogin);
+    } function showUserInfo(result) {
+        if (!result || !result.user) {
+    console.error('Invalid user data:', result);
+    showGuestContent();
+    return;
+  }
+      welcomeUsername.textContent = result.user ? result.user.username : '用户';
+      userInfo.innerHTML = `欢迎，${result.user ? result.user.username : '用户'} 
+        <span style="cursor: pointer; color: var(--primary-color); margin-left: 10px;" id="accountManage">账户管理</span>`;
+      userInfo.style.display = 'block';
+      userContent.style.display = 'block';
+      guestContent.style.display = 'none';
+      authBtn.style.display = 'none';
+      if (!result.user.email) {
+        setTimeout(() => {
+          bindEmailModal.style.display = 'block';
+        }, 1000);
+      }
+      document.getElementById('accountManage').addEventListener('click', function () {
+        updateStatusModal(result);
+        statusModal.style.display = 'block';
+      });
+    } function showGuestContent() {
+      userInfo.style.display = 'none';
+      userContent.style.display = 'none';
+      guestContent.style.display = 'block';
+      authBtn.style.display = 'inline-block';
+    } function handleLogout() {
+      deleteCookie('session');
+      showGuestContent();
+      statusModal.style.display = 'none';
+      alert('已成功退出登录');
+    } function closeStatusModalFunc() {
+      statusModal.style.display = 'none';
+    } authBtn.addEventListener('click', () => openAuthModal());
+    closeAuth.addEventListener('click', closeAuthModal);
+    loginTab.addEventListener('click', () => switchTab('login'));
+    registerTab.addEventListener('click', () => switchTab('register'));
+    forgotPasswordTab.addEventListener('click', () => switchTab('forgotPassword'));
+    forgotPasswordLink.addEventListener('click', (e) => { e.preventDefault(); switchTab('forgotPassword'); });
+    loginForm.addEventListener('submit', handleLogin);
+    registerForm.addEventListener('submit', handleRegister);
+    forgotPasswordForm.addEventListener('submit', handleForgotPassword);
+    closeStatusModal.addEventListener('click', closeStatusModalFunc);
+    closeStatusBtn.addEventListener('click', closeStatusModalFunc);
+    logoutFromStatusBtn.addEventListener('click', handleLogout);
+    statusModal.addEventListener('click', (e) => { if (e.target === statusModal) closeStatusModalFunc(); });
+    bindAuthLinks();
+    window.addEventListener('load', () => { checkLoginStatus(); });
+  </script>
+</body>
+
+</html>

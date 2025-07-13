@@ -7,7 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"net/http"
-	"os"
+	"strconv"
 	"strings"
 	"time"
 	"webroot/models"
@@ -46,19 +46,60 @@ type bindmail struct {
 	Email string `form:"email"`
 }
 
+type NavItem struct {
+	Text string `json:"text"`
+	URL  string `json:"url"`
+}
+
+type LinksItem struct {
+	Name string `json:"name"`
+	URL  string `json:"url"`
+}
+
+type ArticleResponse struct {
+    Pagination Pagination `json:"pagination"`
+    Articles   []Article  `json:"articles"`
+}
+
+type Pagination struct {
+    CurrentPage  int `json:"currentPage"`
+    TotalPages   int `json:"totalPages"`
+    ItemsPerPage int `json:"itemsPerPage"`
+    TotalItems   int `json:"totalItems"`
+}
+
+type Article struct {
+    ID      int    `json:"id"`
+    Title   string `json:"title"`
+    Meta    Meta   `json:"meta"`
+    Image   string `json:"image"`
+    Excerpt string `json:"excerpt"`
+}
+
+type Meta struct {
+    Date     string `json:"date"`
+    Category string `json:"category"`
+    Views    int    `json:"views"`
+}    
+
 func BlogHandlers(c *gin.Context) {
 	switch {
 	case c.Request.URL.Path == "/":
-		htmlFile := "./public/blog/index.html"
-		content, err := os.ReadFile(htmlFile)
+		content, err := GetStaticFileContent("blog/index.html")
+		if err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "无法读取文件"})
+			return
+		}
+		c.Data(http.StatusOK, "text/html; charset=utf-8", content)
+	case c.Request.URL.Path == "/user":
+		content, err := GetStaticFileContent("blog/user.html")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "无法读取文件"})
 			return
 		}
 		c.Data(http.StatusOK, "text/html; charset=utf-8", content)
 	case c.Request.URL.Path == "/test":
-		htmlFile := "./public/blog/test.html"
-		content, err := os.ReadFile(htmlFile)
+		content, err := GetStaticFileContent("blog/test.html")
 		if err != nil {
 			c.JSON(http.StatusInternalServerError, gin.H{"error": "无法读取文件"})
 			return
@@ -95,6 +136,12 @@ func handlePost(c *gin.Context) {
 func handleGet(c *gin.Context) {
 	action := c.Query("action")
 	switch action {
+	case "getArticles":
+		getArticles_blog(c)
+	case "getFriendLinks":
+		getFriendLinks_blog(c)
+	case "getNav":
+		getNav_blog(c)
 	case "checkLogin":
 		handleCheckLogin_blog(c)
 	case "captcha":
@@ -107,6 +154,58 @@ func handleGet(c *gin.Context) {
 	}
 }
 
+func getArticles_blog(c *gin.Context) {
+    page := 1
+    if p, err := strconv.Atoi(c.Query("page")); err == nil && p > 0 {
+        page = p
+    }
+
+    // 模拟数据库查询
+    articles := []Article{
+        {
+            ID:    1,
+            Title: "本站成立",
+            Meta: Meta{
+                Date:     "2025-07-13",
+                Category: "公告",
+                Views:    0,
+            },
+            Image:   "https://picsum.photos/400/240?random=1",
+            Excerpt: "这一切只是一个测试的开始...",
+        },
+    }
+
+    // 模拟分页计算
+    totalItems := 1
+    itemsPerPage := 1
+    totalPages := (totalItems + itemsPerPage - 1) / itemsPerPage
+
+    response := ArticleResponse{
+        Pagination: Pagination{
+            CurrentPage:  page,
+            TotalPages:   totalPages,
+            ItemsPerPage: itemsPerPage,
+            TotalItems:   totalItems,
+        },
+        Articles: articles,
+    }
+
+    c.JSON(http.StatusOK, response)
+}    
+func getFriendLinks_blog(c *gin.Context) {
+	linksData := []LinksItem{
+		{Name: "测试", URL: "#"},
+		{Name: "用户", URL: "/user"},
+	}
+	c.JSON(http.StatusOK, gin.H{"links": linksData})
+}
+func getNav_blog(c *gin.Context) {
+	navData := []NavItem{
+		{Text: "测试", URL: "#"},
+		{Text: "用户", URL: "/user"},
+	}
+	c.JSON(http.StatusOK, gin.H{"data": navData})
+}
 func handleForgotPassword_blog(c *gin.Context) {
 	var req ForgotPasswordRequest
 	if err := c.ShouldBind(&req); err != nil {

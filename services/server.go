@@ -72,7 +72,7 @@ func (s *ServerService) StartServers() {
 
 	if s.Config.Server.HTTPEncabled {
 		addr := s.Config.Server.HTTPPort
-		log.Printf("HTTP服务器已启动，监听地址：%s\n", addr)
+		log.Printf("HTTP服务器已启动 监听地址：%s\n", addr)
 		s.server = &http.Server{
 			Addr:    addr,
 			Handler: r,
@@ -88,7 +88,7 @@ func (s *ServerService) StartServers() {
 		addr := s.Config.Server.HTTPSPort
 		certFile := s.Config.Server.SSL.CertFile
 		keyFile := s.Config.Server.SSL.KeyFile
-		log.Printf("HTTPS服务器已启动，监听地址：%s\n", addr)
+		log.Printf("HTTPS服务器已启动 监听地址：%s\n", addr)
 		s.tlsServer = &http.Server{
 			Addr:    addr,
 			Handler: r,

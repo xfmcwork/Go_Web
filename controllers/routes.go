@@ -14,7 +14,7 @@ import (
 
 var hostHandlers = map[string]func(*gin.Context){
 	"127.0.0.1":  BlogHandlers,
-	"t0.vlun.cn": BlogHandlers,
+	"192.168.2.8": BlogHandlers,
 }
 
 func RegisterRoutes(r *gin.Engine) {
