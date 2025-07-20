@@ -2,17 +2,13 @@ package controllers
 
 import (
 	"crypto/md5"
-	"errors"
 	"fmt"
-	"log"
 	"math/rand"
 	"net/http"
 	"strconv"
 	"strings"
 	"time"
 	"webroot/models"
-
-	"github.com/dchest/captcha"
 	"github.com/gin-contrib/sessions"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
@@ -146,7 +142,7 @@ func handleGet(c *gin.Context) {
 		handleCheckLogin_blog(c)
 	case "captcha":
 		c.Status(201)
-		getCaptcha(c)
+		GetCaptcha(c)
 	case "checkRToken":
 		checkRToken(c)
 	default:
@@ -212,7 +208,7 @@ func handleForgotPassword_blog(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数验证失败", "details": err.Error()})
 		return
 	}
-	valid, err := verifyForm(c)
+	valid, err := VerifyForm(c)
 	if !valid {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "验证码验证失败", "details": err.Error()})
 		return
@@ -358,7 +354,7 @@ func handleRegister_blog(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数验证失败", "details": err.Error()})
 		return
 	}
-	valid, err := verifyForm(c)
+	valid, err := VerifyForm(c)
 	if !valid {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "验证码验证失败", "details": err.Error()})
 		return
@@ -402,7 +398,7 @@ func handleLogin_blog(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "参数验证失败", "details": err.Error()})
 		return
 	}
-	valid, err := verifyForm(c)
+	valid, err := VerifyForm(c)
 	if !valid {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "验证码验证失败", "details": err.Error()})
 		return
@@ -504,40 +500,7 @@ func generateRToken() string {
 	return fmt.Sprintf("%x", time.Now().UnixNano()+rand.Int63())
 }
 
-func getCaptcha(c *gin.Context) {
-	session := sessions.Default(c)
-	if oldID, ok := session.Get("captcha_id").(string); ok && oldID != "" {
-		captcha.Reload(oldID)
-	}
-	captchaID := captcha.NewLen(4)
-	session.Set("captcha_id", captchaID)
-	log.Printf("生成新验证码: %s", captchaID)
-	session.Save()
-	c.Header("Cache-Control", "no-cache, no-store, must-revalidate")
-	c.Header("Pragma", "no-cache")
-	c.Header("Expires", "0")
-	c.Status(200)
-	captcha.WriteImage(c.Writer, captchaID, 240, 80)
-}
 
-func verifyForm(c *gin.Context) (bool, error) {
-	session := sessions.Default(c)
-	captchaID := session.Get("captcha_id")
-	if captchaID == nil {
-		return false, errors.New("验证码已过期或无效")
-	}
-	userCaptcha := c.PostForm("captcha")
-	if userCaptcha == "" {
-		log.Printf("验证码为空 %v", captchaID)
-		return false, errors.New("请提供验证码")
-	}
-	if !captcha.VerifyString(captchaID.(string), userCaptcha) {
-		log.Printf("验证码错误 %v 用户输入: %s", captchaID, userCaptcha)
-		return false, errors.New("验证码错误")
-	}
-	log.Printf("验证码验证成功 %v 已删除", captchaID)
-	return true, nil
-}
 
 func MD5(str string) string {
 	data := []byte(str)

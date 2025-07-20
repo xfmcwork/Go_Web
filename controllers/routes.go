@@ -12,22 +12,41 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-var hostHandlers = map[string]func(*gin.Context){
-	"127.0.0.1":  BlogHandlers,
-	"192.168.2.8": BlogHandlers,
+var handlerRegistry = map[string]func(*gin.Context){
+	"Blog": BlogHandlers,
+}
+
+var hostHandlers map[string]func(*gin.Context)
+
+func init() {
+	initHostHandlers()
+}
+
+func initHostHandlers() {
+	config := models.GetConfig()
+	hostHandlers = make(map[string]func(*gin.Context))
+	for host, handlerName := range config.Server.HostHandlers {
+		handler, exists := handlerRegistry[handlerName]
+		if !exists {
+			log.Printf("警告: 未找到处理器 %s，主机 %s 将使用默认处理器", handlerName, host)
+			continue
+		}
+		hostHandlers[host] = handler
+		log.Printf("注册主机处理器: %s -> %s", host, handlerName)
+	}
 }
 
 func RegisterRoutes(r *gin.Engine) {
 	store := cookie.NewStore([]byte("WoXiHanXiMi250"))
 	r.Use(sessions.Sessions("session", store))
-	
+
 	r.Use(func(c *gin.Context) {
 		c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
 		c.Writer.Header().Set("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS")
 		c.Writer.Header().Set("Access-Control-Allow-Headers", "Origin, Content-Type, Accept, Authorization")
 		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
 		c.Writer.Header().Set("Server", "My-Server")
-		
+
 		configValue, exists := c.Get("config")
 		if !exists {
 			log.Println("配置未找到")
@@ -41,13 +60,12 @@ func RegisterRoutes(r *gin.Engine) {
 			c.AbortWithStatusJSON(http.StatusInternalServerError, gin.H{"msg": "配置类型错误"})
 			return
 		}
-		
+
 		if config.Server.HTTPToHTTPS && c.Request.TLS == nil {
 			scheme := "https"
 			host := c.Request.Host
 			uri := c.Request.URL.String()
 			newURL := fmt.Sprintf("%s://%s%s", scheme, host, uri)
-			log.Printf("HTTP重定向到HTTPS: %s", newURL)
 			c.Redirect(http.StatusFound, newURL)
 			c.Abort()
 		}
